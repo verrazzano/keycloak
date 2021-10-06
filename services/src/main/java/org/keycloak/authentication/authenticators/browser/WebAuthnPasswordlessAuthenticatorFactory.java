@@ -53,4 +53,10 @@ public class WebAuthnPasswordlessAuthenticatorFactory extends WebAuthnAuthentica
     public String getId() {
         return PROVIDER_ID;
     }
+
+    // backported from https://github.com/keycloak/keycloak/commit/65480cb5a11630909c086f79d396004499fbd1e4
+    @Override
+    public boolean isUserSetupAllowed() {
+        return false;
+    }
 }

@@ -1,26 +1,18 @@
-# Security Policy
+# Reporting Security Vulnerabilities
 
-## Supported Versions
+Oracle values the independent security research community and believes that responsible disclosure of security vulnerabilities helps us ensure the security and privacy of all our users.
 
-To receive fixes for security vulnerabilities it is required to always upgrade to the latest version of Keycloak. 
-See https://www.keycloak.org/downloads for the latest release.
+Please do NOT raise a GitHub Issue to report a security vulnerability. If you believe you have found a security vulnerability, please submit a report to secalert_us@oracle.com preferably with a proof of concept. We provide additional information on [how to report security vulnerabilities to Oracle](https://www.oracle.com/corporate/security-practices/assurance/vulnerability/reporting.html) which includes public encryption keys for secure email.
 
-Fixes will only be released for previous releases under special circumstances.
+We ask that you do not use other channels or contact project contributors directly. 
 
-## Reporting a Vulnerability
+Non-vulnerability related security issues such as new great new ideas for security features are welcome on GitHub Issues. 
 
-To report a security vulnerability:
+## Security Updates, Alerts and Bulletins
 
-You can report a security vulnerability either through email, or in our issue tracker. If you are uncertain what you have 
-discovered is a vulnerability or you believe it is a critical issue please report using email (or both).
+Security updates will be released on a regular cadence. Many of our projects will typically release security fixes in conjunction with the [Oracle Critical Patch Update](https://www.oracle.com/security-alerts/) program. Security updates are released on the Tuesday closest to the 17th day of January, April, July and October. A pre-release announcement will be published on the Thursday preceding each release. Additional information, including past advisories, is available on our [Security Alerts](https://www.oracle.com/security-alerts/) page.
 
-To report through email send an email to keycloak-security@googlegroups.com. 
+## Security-Related Information
 
-To report through issue tracker:
+We will provide security related information such as a threat model, considerations for secure use, or any known security issues in our documentation. Please note that labs and sample code are intended to demonstrate a concept and may not be sufficiently hardened for production use.
 
-* Go to https://issues.jboss.org/browse/KEYCLOAK
-* Create a new issue in the Keycloak project
-* Make sure the "This issue is security relevant" checkbox is checked
-
-If you have a patch for the issue please use `git format-patch` and attach to the email or issue. Please do not open a 
-pull request on GitHub as that may disclose sensitive details around the vulnerability.

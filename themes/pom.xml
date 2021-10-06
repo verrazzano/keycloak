@@ -75,6 +75,8 @@
                     <nodeVersion>v12.13.0</nodeVersion>
                     <npmVersion>6.9.0</npmVersion>
                     <installDirectory>${project.basedir}</installDirectory>
+                    <npmDownloadRoot>${npm.download.root}</npmDownloadRoot>
+                    <npmInheritsProxyConfigFromMaven>false</npmInheritsProxyConfigFromMaven>
                 </configuration>
             </plugin>
         </plugins>

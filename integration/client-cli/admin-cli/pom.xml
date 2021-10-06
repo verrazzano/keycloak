@@ -117,7 +117,7 @@
                                     </includes>
                                 </filter>
                                 <filter>
-                                    <artifact>com.fasterxml.jackson.core:jackson-databind</artifact>
+                                    <artifact>com.fasterxml.jackson.core:jackson-databind:2.12.6.1</artifact>
                                     <includes>
                                         <include>**/**</include>
                                     </includes>
