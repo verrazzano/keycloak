@@ -209,6 +209,9 @@
         <org.wildfly.galleon-plugins.version>5.1.3.Final</org.wildfly.galleon-plugins.version>
         <org.jboss.galleon.version>4.2.8.Final</org.jboss.galleon.version>
 
+        <!-- SnakeYAML -->
+        <org.yaml.snakeyaml.version>1.32</org.yaml.snakeyaml.version>
+
         <!-- Galleon -->
         <galleon.fork.embedded>true</galleon.fork.embedded>
         <galleon.log.time>true</galleon.log.time>
@@ -667,6 +670,11 @@
                 <groupId>org.apache.directory.api</groupId>
                 <artifactId>api-ldap-codec-standalone</artifactId>
                 <version>${apacheds.codec.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${org.yaml.snakeyaml.version}</version>
             </dependency>
 
             <!-- Selenium -->
