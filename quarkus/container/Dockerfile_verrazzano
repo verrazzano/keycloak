@@ -20,6 +20,11 @@ RUN mv /tmp/keycloak/keycloak-* /opt/keycloak && mkdir -p /opt/keycloak/data
 
 RUN chmod -R g+rwX /opt/keycloak
 
+# Configure a database vendor
+ENV KC_DB=mysql
+
+RUN /opt/keycloak/bin/kc.sh build
+
 FROM ghcr.io/oracle/oraclelinux:8-slim
 ENV LANG en_US.UTF-8
 
