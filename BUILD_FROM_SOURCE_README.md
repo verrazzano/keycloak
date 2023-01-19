@@ -14,10 +14,10 @@ To build only the Keycloak server, run:
 ```
  cd verrazzano/keycloak/quarkus
  # build the project for the first time to put required modules of Keycloak into local maven cache in package org.keycloak
- mvn --settings ../maven-settings.xml -f ../pom.xml clean install -DskipTestsuite -DskipExamples -DskipTests >> ${WORKSPACE}/mvn_build_main.out 2>&1
+ mvn --settings ../maven-settings.xml -f ../pom.xml clean install -DskipTestsuite -DskipExamples -DskipTests
  
  # build Keycloak Quarkus distribution
- mvn --settings ../maven-settings.xml -f dist/pom.xml clean install >> ${WORKSPACE}/mvn_build_quarkus.out 2>&1
+ mvn --settings ../maven-settings.xml -f dist/pom.xml clean install
 ```
 
 A successful maven build creates the distribution archive keycloak-20.0.1.tar.gz under keycloak/quarkus/dist/target.  
