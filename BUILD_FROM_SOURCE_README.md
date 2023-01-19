@@ -11,7 +11,7 @@ Prerequisites: Building Keycloak from source requires the following:
 
 ```
  git clone https://github.com/verrazzano/keycloak
- # git checkout oracle/release/20.0.1 or a branch created from oracle/release/20.0.
+ # git checkout oracle/release/20.0.1 or a branch created from oracle/release/20.0.1
  # cd <project directory>/quarkus
 
  # build the project for the first time to put required modules of Keycloak into local maven cache in package org.keycloak
