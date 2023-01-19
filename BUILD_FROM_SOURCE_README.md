@@ -41,6 +41,7 @@ In order to tag and push the docker image, define the following environment vari
  export DOCKER_REPO=<Docker Repository>
  export DOCKER_NAMESPACE=<Docker Namespace>
  export DOCKER_TAG=<Docker Tag>
+ export DOCKER_IMAGE_NAME=keycloak
 ```
 
 Build and push the image to container registry:
@@ -49,5 +50,3 @@ Build and push the image to container registry:
  docker image build --build-arg KEYCLOAK_DIST=keycloak-20.0.1.tar.gz -f ./Dockerfile_verrazzano -t ${DOCKER_REPO}/${DOCKER_NAMESPACE}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG} .
  docker image push ${DOCKER_REPO}/${DOCKER_NAMESPACE}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG}
 ```
-
-
