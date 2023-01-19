@@ -45,8 +45,8 @@ In order to tag and push the docker image, define the following environment vari
 Build and push the image to container registry:
 ```
  cd verrazzano/keycloak/quarkus/container
- docker image build --build-arg KEYCLOAK_DIST=keycloak-20.0.1.tar.gz -f ./Dockerfile_verrazzano -t ${params.DOCKER_REPO}/${params.DOCKER_NAMESPACE}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} .
- docker image push ${params.DOCKER_REPO}/${params.DOCKER_NAMESPACE}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
+ docker image build --build-arg KEYCLOAK_DIST=keycloak-20.0.1.tar.gz -f ./Dockerfile_verrazzano -t ${DOCKER_REPO}/${DOCKER_NAMESPACE}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} .
+ docker image push ${DOCKER_REPO}/${DOCKER_NAMESPACE}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
 ```
 
 
