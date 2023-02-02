@@ -38,6 +38,8 @@ RUN microdnf update -y && \
     microdnf install -y python38 python38-pip && \
     pip3 install setuptools --upgrade && \
     rm -rf /usr/lib/python3.6 && \
+    # remove the previously installed package info
+    rm -rf /usr/lib/python3.8/site-packages/setuptools-41.6.0.dist-info && \
     microdnf clean all && rm -rf /var/cache/yum/* && \
     echo "keycloak:x:0:root" >> /etc/group && \
     echo "keycloak:x:1000:0:keycloak user:/opt/keycloak:/sbin/nologin" >> /etc/passwd
