@@ -217,6 +217,9 @@
 
         <!-- Frontend -->
         <node.version>v16.16.0</node.version>
+
+        <!-- SnakeYAML -->
+        <snakeyaml.version>2.0</snakeyaml.version>
     </properties>
 
     <url>http://keycloak.org</url>
@@ -1714,6 +1717,18 @@
                 <groupId>org.wildfly.galleon-plugins</groupId>
                 <artifactId>transformer</artifactId>
                 <version>${org.wildfly.galleon-plugins.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>*</groupId>
