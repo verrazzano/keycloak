@@ -115,9 +115,10 @@
         <xmlsec.version>2.2.3</xmlsec.version>
         <wildfly.common.version>1.6.0.Final</wildfly.common.version>
         <nashorn.version>15.3</nashorn.version>
-        <ua-parser.version>1.5.2</ua-parser.version>
+        <ua-parser.version>1.5.4</ua-parser.version>
         <picketbox.version>5.0.3.Final</picketbox.version>
         <google.guava.version>30.1-jre</google.guava.version>
+        <snakeyaml.version>2.0</snakeyaml.version>
 
         <!-- Openshift -->
         <version.com.openshift.openshift-restclient-java>9.0.5.Final</version.com.openshift.openshift-restclient-java>
@@ -217,9 +218,6 @@
 
         <!-- Frontend -->
         <node.version>v16.16.0</node.version>
-
-        <!-- SnakeYAML -->
-        <snakeyaml.version>2.0</snakeyaml.version>
     </properties>
 
     <url>http://keycloak.org</url>
@@ -376,6 +374,17 @@
                 <groupId>com.github.ua-parser</groupId>
                 <artifactId>uap-java</artifactId>
                 <version>${ua-parser.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.yaml</groupId>
+                        <artifactId>snakeyaml</artifactId>
+                    </exclusion>
+		</exclusions>
+            </dependency>
+            <dependency>
+              <groupId>org.yaml</groupId>
+              <artifactId>snakeyaml</artifactId>
+              <version>${snakeyaml.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.mail</groupId>
@@ -1717,18 +1726,6 @@
                 <groupId>org.wildfly.galleon-plugins</groupId>
                 <artifactId>transformer</artifactId>
                 <version>${org.wildfly.galleon-plugins.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>*</groupId>
