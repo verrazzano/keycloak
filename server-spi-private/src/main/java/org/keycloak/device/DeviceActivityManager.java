@@ -41,11 +41,12 @@ public class DeviceActivityManager {
     private static final Parser UA_PARSER;
 
     static {
-        try {
-            UA_PARSER = new Parser();
-        } catch (IOException cause) {
-            throw new RuntimeException("Failed to create user agent parser", cause);
-        }
+        // The constructor of ua_parser.Parser in v1.5.4 doesn't throw an IOException
+        //try {
+        UA_PARSER = new Parser();
+        //} catch (IOException cause) {
+        //    throw new RuntimeException("Failed to create user agent parser", cause);
+        //}
     }
 
     /** Returns the device information associated with the given {@code userSession}.

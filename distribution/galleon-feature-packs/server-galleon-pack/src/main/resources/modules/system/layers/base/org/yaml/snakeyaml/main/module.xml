@@ -27,7 +27,7 @@
     </properties>
 
     <resources>
-        <artifact name="org.yaml:snakeyaml:1.32"></artifact>
+        <artifact name="org.yaml:snakeyaml:2.0"></artifact>
     </resources>
 
     <dependencies>
