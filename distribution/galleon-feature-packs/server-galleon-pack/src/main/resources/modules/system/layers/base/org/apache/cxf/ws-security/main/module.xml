@@ -23,7 +23,7 @@
 <module xmlns="urn:jboss:module:1.9" name="org.apache.cxf.ws-security">
 
     <resources>
-	<artifact name="org.apache.cxf:cxf-rt-ws-security:3.4.5"></artifact>
+	<artifact name="org.apache.cxf:cxf-rt-ws-security:3.4.10"></artifact>
     </resources>
 
     <dependencies>
