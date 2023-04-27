@@ -64,12 +64,12 @@ jobs:
       # Copy additional licenses, etc.
       - name: Copy additional artifacts
         run: |
-          cd quarkus
-          cp ./dist/target/keycloak-${{env.KEYCLOAK_VERSION}}.tar.gz ./container
-          cp ./THIRD_PARTY_LICENSES.txt ./container
-          cp ./SECURITY.md ./container
-          cp ./LICENSE.txt ./container
-          cp ./README.md ./container
+          cd container
+          cp ../dist/target/keycloak-${{env.KEYCLOAK_VERSION}}.tar.gz ./container
+          cp ../THIRD_PARTY_LICENSES.txt ./container
+          cp ../SECURITY.md ./container
+          cp ../LICENSE.txt ./container
+          cp ../README.md ./container
 
       # Upload artifacts to GitHub
       - name: Store Keycloak artifacts
