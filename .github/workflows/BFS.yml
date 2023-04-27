@@ -54,16 +54,30 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      # Bundle Keycloak
-      - name: Bundle Keycloak distribution
+      # Build Keycloak
+      - name: Build Keycloak distribution
         run : |
           cd quarkus
           mvn --settings ../maven-settings.xml -f ../pom.xml clean install -DskipTestsuite -DskipExamples -DskipTests
           mvn --settings ../maven-settings.xml -f dist/pom.xml clean install
 
+      # Copy additional licenses, etc.
+      - name: Copy additional artifacts
+        run: |
           cd container
-          cp ./dist/target/keycloak-${env.KEYCLOAK_VERSION}.tar.gz ./container
+          cp ./dist/target/keycloak-${{env.KEYCLOAK_VERSION}}.tar.gz ./container
           cp ./THIRD_PARTY_LICENSES.txt ./container
           cp ./SECURITY.md ./container
           cp ./LICENSE.txt ./container
           cp ./README.md ./container
+
+      # Upload artifacts to GitHub
+      - name: Store Keycloak artifacts
+        id: store-keycloak
+        uses: actions/upload-artifact@v3
+        with:
+          name: keycloak-artifacts.zip
+          retention-days: 1
+          path: |
+            quarkus/container
+            quarkus/container/**/*.tar.gz
