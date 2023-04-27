@@ -2,6 +2,7 @@ name: Keycloak BFS
 
 on:
   push:
+    branches: ['stshapir*']
   workflow_dispatch:
 
 env:
@@ -56,9 +57,6 @@ jobs:
       - name: Bundle Keycloak distribution
         run : |
           cd quarkus
-          pwd
-          cd ~
-          pwd
           mvn --settings ../maven-settings.xml -f ../pom.xml clean install -DskipTestsuite -DskipExamples -DskipTests
           mvn --settings ../maven-settings.xml -f dist/pom.xml clean install
 
