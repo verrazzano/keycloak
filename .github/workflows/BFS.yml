@@ -64,7 +64,7 @@ jobs:
       # Copy additional licenses, etc.
       - name: Copy additional artifacts
         run: |
-          cd container
+          cd quarkus
           cp ./dist/target/keycloak-${{env.KEYCLOAK_VERSION}}.tar.gz ./container
           cp ./THIRD_PARTY_LICENSES.txt ./container
           cp ./SECURITY.md ./container
