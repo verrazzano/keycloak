@@ -10,7 +10,6 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   KEYCLOAK_VERSION: 20.0.1
-  DOCKER_NAMESPACE: verrazzano
 
 concurrency:
   # Only run once for latest commit per ref and cancel other (previous) runs.
@@ -84,6 +83,6 @@ jobs:
         with:
           context: ${{github.workspace}}/quarkus/container
           push: true
-          tags: ${{env.REGISTRY}}/${{env.DOCKER_NAMESPACE}}/${{env.IMAGE_NAME}}:${{env.DOCKER_IMAGE_TAG}}
+          tags: ${{env.REGISTRY}}/${{env.IMAGE_NAME}}:${{env.DOCKER_IMAGE_TAG}}
           file: ${{github.workspace}}/quarkus/container/Dockerfile_verrazzano
           build-args: KEYCLOAK_DIST=keycloak-${{env.KEYCLOAK_VERSION}}.tar.gz
