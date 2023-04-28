@@ -65,7 +65,7 @@ jobs:
       - name: Copy additional artifacts
         run: |
           cd quarkus
-          cp ../dist/target/keycloak-${{env.KEYCLOAK_VERSION}}.tar.gz ./container
+          cp ./dist/target/keycloak-${{env.KEYCLOAK_VERSION}}.tar.gz ./container
           cp ../THIRD_PARTY_LICENSES.txt ./container
           cp ../SECURITY.md ./container
           cp ../LICENSE.txt ./container
