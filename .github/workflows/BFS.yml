@@ -1,4 +1,5 @@
 name: Keycloak BFS
+run-name: GitHub Actions workflow to build Keycloak from source 🔑
 
 on:
   push:
