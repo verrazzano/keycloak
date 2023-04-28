@@ -50,14 +50,17 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
+      # Get Keycloak image timestamp
+      - name: Get image timestamp
+        run: echo "TIME_STAMP=$(date +%Y%m%d%H%M%S")" >> "$GITHUB_ENV"
+
+      # Get Keycloak image sha
+      - name: Get image short commit sha
+        run: echo "SHORT_COMMIT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+
       # Get Keycloak image tag
       - name: Get image tag
-        shell: bash
-        run: |
-          echo "TIME_STAMP=$(date +%Y%m%d%H%M%S")" >> "$GITHUB_ENV"
-          echo "SHORT_COMMIT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
-          echo "DOCKER_IMAGE_TAG="v"+${{env.KEYCLOAK_VERSION}}+"-"+${{TIME_STAMP}}+"-"+${{SHORT_COMMIT_SHA}}" >> "$GITHUB_ENV"
-          echo "Image tag: " + ${{docker_image_tag}}
+        run: echo "DOCKER_IMAGE_TAG="v"+${{env.KEYCLOAK_VERSION}}+"-"+${{env.TIME_STAMP}}+"-"+${{env.SHORT_COMMIT_SHA}}" >> "$GITHUB_ENV"
 
       # Build Keycloak (Maven)
       - name: Build Keycloak distribution
