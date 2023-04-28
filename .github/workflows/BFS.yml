@@ -54,11 +54,9 @@ jobs:
       - name: Get image tag
         run: |
           TIME_STAMP=$(date +'%Y%m%d%H%M%S')
-          echo $TIME_STAMP
           SHORT_COMMIT_SHA=$(git rev-parse --short HEAD)
-          echo $SHORT_COMMIT_SHA
           echo "DOCKER_IMAGE_TAG=v${{env.KEYCLOAK_VERSION}}-${TIME_STAMP}-${SHORT_COMMIT_SHA}" >> "$GITHUB_ENV"
-          echo "Image tag: ${DOCKER_IMAGE_TAG}"
+          echo $DOCKER_IMAGE_TAG
 
       # Build Keycloak (Maven)
       - name: Build Keycloak distribution
