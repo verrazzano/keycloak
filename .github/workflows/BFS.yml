@@ -85,5 +85,5 @@ jobs:
           context: ${{github.workspace}}/quarkus/container
           push: true
           tags: ${{env.REGISTRY}}/${{env.DOCKER_NAMESPACE}}/${{env.IMAGE_NAME}}:${{env.DOCKER_IMAGE_TAG}}
-          file: Dockerfile_verrazzano
+          file: ${{github.workspace}}/quarkus/container/Dockerfile_verrazzano
           build-args: KEYCLOAK_DIST=keycloak-${{env.KEYCLOAK_VERSION}}.tar.gz
