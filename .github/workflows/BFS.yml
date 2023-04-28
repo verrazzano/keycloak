@@ -64,8 +64,9 @@ jobs:
       # Build Keycloak (Maven)
       - name: Build Keycloak distribution
         run : |
-          echo ${{github.workspace}}
-          cd quarkus
+          cd ${{github.workspace}}
+          pwd
+#          cd quarkus
 #          mvn --settings ../maven-settings.xml -f ../pom.xml clean install -DskipTestsuite -DskipExamples -DskipTests
 #          mvn --settings ../maven-settings.xml -f dist/pom.xml clean install
 
