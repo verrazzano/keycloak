@@ -1,10 +1,10 @@
 name: Keycloak BFS
-run-name: GitHub Actions workflow to build Keycloak from source 🔑
+run-name: GitHub Actions workflow triggered by changes to Keycloak BFS 🔑
 
 on:
   push:
     branches:
-    - 'stshapir/*'
+    - 'oracle/release/20.0.1'
   workflow_dispatch:
 
 env:
