@@ -50,17 +50,13 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      # Get Keycloak image timestamp
-      - name: Get image timestamp
-        run: echo "TIME_STAMP=$(date +%Y%m%d%H%M%S")" >> "$GITHUB_ENV"
-
-      # Get Keycloak image sha
-      - name: Get image short commit sha
-        run: echo "SHORT_COMMIT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
-
       # Get Keycloak image tag
       - name: Get image tag
-        run: echo "DOCKER_IMAGE_TAG="v"+${{env.KEYCLOAK_VERSION}}+"-"+${{env.TIME_STAMP}}+"-"+${{env.SHORT_COMMIT_SHA}}" >> "$GITHUB_ENV"
+        run: |
+          echo "TIME_STAMP=$(date +%Y%m%d%H%M%S")" >> "$GITHUB_ENV"
+          echo "SHORT_COMMIT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+          echo "DOCKER_IMAGE_TAG="v"+${{env.KEYCLOAK_VERSION}}+"-"+${{env.TIME_STAMP}}+"-"+${{env.SHORT_COMMIT_SHA}}" >> "$GITHUB_ENV"
+          echo "Image tag: " + ${{docker_image_tag}}
 
       # Build Keycloak (Maven)
       - name: Build Keycloak distribution
@@ -85,7 +81,7 @@ jobs:
         with:
           context: ./quarkus/container
           push: true
-          tags: ${{env.REGISTRY}}/${{env.DOCKER_NAMESPACE}}/${{IMAGE_NAME}}:${{env.DOCKER_IMAGE_TAG}}
+          tags: ${{env.REGISTRY}}/${{env.DOCKER_NAMESPACE}}/${{env.IMAGE_NAME}}:${{env.DOCKER_IMAGE_TAG}}
           file: Dockerfile_verrazzano
           build-args: KEYCLOAK_DIST=keycloak-${{env.KEYCLOAK_VERSION}}.tar.gz
 
