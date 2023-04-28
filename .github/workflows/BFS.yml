@@ -53,8 +53,9 @@ jobs:
       # Get Keycloak image tag
       - name: Get image tag
         run: |
-          echo "TIME_STAMP=$(returnStdout: true, script: "date +%Y%m%d%H%M%S").trim()" >> "$GITHUB_ENV"
-          echo "SHORT_COMMIT_SHA=$(returnStdout: true, script: "git rev-parse --short HEAD").trim()" >> "$GITHUB_ENV"
+          echo "IS_LATEST=$(<.latest)" >> "$GITHUB_ENV"
+          echo "TIME_STAMP=$(date +%Y%m%d%H%M%S")" >> "$GITHUB_ENV"
+          echo "SHORT_COMMIT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
           echo "DOCKER_IMAGE_TAG="v"+${{env.KEYCLOAK_VERSION}}+"-"+${{TIME_STAMP}}+"-"+${{SHORT_COMMIT_SHA}}" >> "$GITHUB_ENV"
           echo "Image tag: " + ${{docker_image_tag}}
 
