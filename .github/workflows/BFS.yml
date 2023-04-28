@@ -7,11 +7,10 @@ on:
   workflow_dispatch:
 
 env:
-  # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
   KEYCLOAK_VERSION: 20.0.1
+  DOCKER_NAMESPACE: verrazzano
 
 concurrency:
   # Only run once for latest commit per ref and cancel other (previous) runs.
@@ -33,12 +32,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Workaround: https://github.com/docker/build-push-action/issues/461
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
 
       # Login against a Docker registry
-      # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
         uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
         with:
@@ -47,14 +44,21 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Extract metadata (tags, labels) for Docker
-      # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      # Build Keycloak
+      # Get Keycloak image tag
+      - name: Get image tag
+        run: |
+          echo "TIME_STAMP=$(returnStdout: true, script: "date +%Y%m%d%H%M%S").trim()" >> "$GITHUB_ENV"
+          echo "SHORT_COMMIT_SHA=$(returnStdout: true, script: "git rev-parse --short HEAD").trim()" >> "$GITHUB_ENV"
+          echo "DOCKER_IMAGE_TAG="v"+${{env.KEYCLOAK_VERSION}}+"-"+${{TIME_STAMP}}+"-"+${{SHORT_COMMIT_SHA}}" >> "$GITHUB_ENV"
+          echo "Image tag: " + ${{docker_image_tag}}
+
+      # Build Keycloak (Maven)
       - name: Build Keycloak distribution
         run : |
           cd quarkus
@@ -70,6 +74,16 @@ jobs:
           cp ../SECURITY.md ./container
           cp ../LICENSE.txt ./container
           cp ../README.md ./container
+
+      # Build and push Docker image
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: ./quarkus/container
+          push: true
+          tags: ${{env.REGISTRY}}/${{env.DOCKER_NAMESPACE}}/${{IMAGE_NAME}}:${{env.DOCKER_IMAGE_TAG}}
+          file: Dockerfile_verrazzano
+          build-args: KEYCLOAK_DIST=keycloak-${{env.KEYCLOAK_VERSION}}.tar.gz
 
       # Upload artifacts to GitHub
       - name: Store Keycloak artifacts
