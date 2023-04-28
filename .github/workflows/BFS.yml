@@ -64,16 +64,14 @@ jobs:
       # Build Keycloak (Maven)
       - name: Build Keycloak distribution
         run : |
-          cd ${{github.workspace}}
-          pwd
-#          cd quarkus
-#          mvn --settings ../maven-settings.xml -f ../pom.xml clean install -DskipTestsuite -DskipExamples -DskipTests
-#          mvn --settings ../maven-settings.xml -f dist/pom.xml clean install
+          cd ${{github.workspace}}/quarkus
+          mvn --settings ../maven-settings.xml -f ../pom.xml clean install -DskipTestsuite -DskipExamples -DskipTests
+          mvn --settings ../maven-settings.xml -f dist/pom.xml clean install
 
       # Copy additional licenses, etc.
       - name: Copy additional artifacts
         run: |
-          cd quarkus
+          cd ${{github.workspace}}/quarkus
           cp ./dist/target/keycloak-${{env.KEYCLOAK_VERSION}}.tar.gz ./container
           cp ../THIRD_PARTY_LICENSES.txt ./container
           cp ../SECURITY.md ./container
@@ -84,19 +82,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ./quarkus/container
+          context: ${{github.workspace}}/quarkus/container
           push: true
           tags: ${{env.REGISTRY}}/${{env.DOCKER_NAMESPACE}}/${{env.IMAGE_NAME}}:${{env.DOCKER_IMAGE_TAG}}
           file: Dockerfile_verrazzano
           build-args: KEYCLOAK_DIST=keycloak-${{env.KEYCLOAK_VERSION}}.tar.gz
-
-      # Upload artifacts to GitHub
-      - name: Store Keycloak artifacts
-        id: store-keycloak
-        uses: actions/upload-artifact@v3
-        with:
-          name: keycloak-artifacts.zip
-          retention-days: 1
-          path: |
-            quarkus/container
-            quarkus/container/**/*.tar.gz
