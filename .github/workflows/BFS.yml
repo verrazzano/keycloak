@@ -52,6 +52,7 @@ jobs:
 
       # Get Keycloak image tag
       - name: Get image tag
+        shell: bash
         run: |
           echo "TIME_STAMP=$(date +%Y%m%d%H%M%S")" >> "$GITHUB_ENV"
           echo "SHORT_COMMIT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
