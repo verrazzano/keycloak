@@ -4,13 +4,17 @@ run-name: GitHub Actions workflow triggered by changes to Keycloak BFS 🔑
 on:
   push:
     branches:
-    - 'oracle/release/20.0.1'
+    - 'oracle/release/*'
   workflow_dispatch:
+    inputs:
+      KEYCLOAK_VERSION:
+        description: 'Keycloak version to build'
+        required: true
+        default: '20.0.1'
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  KEYCLOAK_VERSION: 20.0.1
+  KEYCLOAK_VERSION: ${{ github.event.inputs.KEYCLOAK_VERSION }}
 
 concurrency:
   # Only run once for latest commit per ref and cancel other (previous) runs.
@@ -56,10 +60,33 @@ jobs:
           echo "TIME_STAMP=$(date +'%Y%m%d%H%M%S')" >> "$GITHUB_ENV"
           echo "SHORT_COMMIT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
+      # Override Keycloak version for main branches
+      - name: Get Keycloak version
+        if: ${{ github.ref_protected }}
+        run: echo "KEYCLOAK_VERSION=$(echo ${{ github.ref_name }} | sed 's:.*/::')" >> "$GITHUB_ENV"
+
+      - name: Debug keycloak version
+        run: echo ${{ env.KEYCLOAK_VERSION }}
+
+      # Get Keycloak image name for main branches
+      - name: Get image name (protected)
+        if: ${{ github.ref_protected }}
+        run: echo "IMAGE_NAME=keycloak" >> "$GITHUB_ENV"
+
+      # Get Keycloak image name for temp branches
+      - name: Get image name (developer)
+        if: !${{ github.ref_protected }}
+        run: echo "IMAGE_NAME=keycloak-temp" >> "$GITHUB_ENV"
+
+      - name: Debug image name
+        run: echo ${{ env.IMAGE_NAME }}
+
       # Get Keycloak image tag
       - name: Get image tag
-        run: |
-          echo "DOCKER_IMAGE_TAG=v${{env.KEYCLOAK_VERSION}}-${{env.TIME_STAMP}}-${{env.SHORT_COMMIT_SHA}}" >> "$GITHUB_ENV"
+        run: echo "DOCKER_IMAGE_TAG=v${{ env.KEYCLOAK_VERSION }}-${{ env.TIME_STAMP }}-${{ env.SHORT_COMMIT_SHA }}" >> "$GITHUB_ENV"
+
+      - name: Debug image tag
+        run: echo ${{ env.DOCKER_IMAGE_TAG }}
 
       # Build Keycloak (Maven)
       - name: Build Keycloak distribution
@@ -68,11 +95,23 @@ jobs:
           mvn --settings ../maven-settings.xml -f ../pom.xml clean install -DskipTestsuite -DskipExamples -DskipTests
           mvn --settings ../maven-settings.xml -f dist/pom.xml clean install
 
-      # Copy additional licenses, etc.
+      # Copy additional licenses, etc. for v20.0.1+
       - name: Copy additional artifacts
+        if: env.KEYCLOAK_VERSION == '20.0.1' || env.KEYCLOAK_VERSION == '20.0.3'
         run: |
-          cd ${{github.workspace}}/quarkus
-          cp ./dist/target/keycloak-${{env.KEYCLOAK_VERSION}}.tar.gz ./container
+          cd ${{ github.workspace }}/quarkus
+          cp ./dist/target/keycloak-${{ env.KEYCLOAK_VERSION }}.tar.gz ./container
+          cp ../THIRD_PARTY_LICENSES.txt ./container
+          cp ../SECURITY.md ./container
+          cp ../LICENSE.txt ./container
+          cp ../README.md ./container
+
+      # Copy additional licenses, etc. for <v20.0.1
+      - name: Copy additional artifacts
+        if: env.KEYCLOAK_VERSION == '10.0.2' || env.KEYCLOAK_VERSION == '15.0.2'
+        run: |
+          cd ${{ github.workspace }}/quarkus
+          cp ./dist/target/keycloak-${{ env.KEYCLOAK_VERSION }}.tar.gz ./container
           cp ../THIRD_PARTY_LICENSES.txt ./container
           cp ../SECURITY.md ./container
           cp ../LICENSE.txt ./container
@@ -82,8 +121,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ${{github.workspace}}/quarkus/container
+          context: ${{ github.workspace }}/quarkus/container
           push: true
-          tags: ${{env.REGISTRY}}/${{env.IMAGE_NAME}}:${{env.DOCKER_IMAGE_TAG}}
-          file: ${{github.workspace}}/quarkus/container/Dockerfile_verrazzano
-          build-args: KEYCLOAK_DIST=keycloak-${{env.KEYCLOAK_VERSION}}.tar.gz
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
+          file: ${{ github.workspace }}/quarkus/container/Dockerfile_verrazzano
+          build-args: KEYCLOAK_DIST=keycloak-${{ env.KEYCLOAK_VERSION }}.tar.gz
