@@ -24,7 +24,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  KEYCLOAK_VERSION: ${{ github.event.inputs.KEYCLOAK_VERSION }}
+  KEYCLOAK_VERSION: github.event.inputs.KEYCLOAK_VERSION
 
 concurrency:
   # Only run once for latest commit per ref and cancel other (previous) runs.
