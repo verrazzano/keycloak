@@ -103,11 +103,14 @@ jobs:
         if: env.KEYCLOAK_VERSION == '15.0.2'
         run : |
           cd ${{ github.workspace }}
+          pwd
           mvn --settings maven-settings.xml -Pdistribution -pl distribution/server-dist -am -Dmaven.test.skip clean install >> ${{ github.workspace }}/mvn_build.out 2>&1
           mkdir -p extract-archive
+          echo "build succeeded"
           cp ${{ env.BUILD_DIR }}/${{ env.KEYCLOAK_ARCHIVE }} ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
           cd ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
           tar zxf ${{ env.KEYCLOAK_ARCHIVE }}
+          pwd
           rm ${{ env.KEYCLOAK_ARCHIVE }}
 
       # Delete cxf-*.jar from the distribution
