@@ -237,6 +237,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: mvn_build
-          path: **/mvn_build*.out
+          path: '**/mvn_build*.out'
 
       # Scan container image
