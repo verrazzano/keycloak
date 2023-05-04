@@ -16,15 +16,9 @@ on:
       - 'oracle/release/*'
       - 'bfs/stshapir/*'
   workflow_dispatch:
-    inputs:
-      KEYCLOAK_VERSION:
-        description: 'Keycloak version to build'
-        required: true
-        default: '20.0.1'
 
 env:
   REGISTRY: ghcr.io
-  KEYCLOAK_VERSION: github.event.inputs.KEYCLOAK_VERSION
 
 concurrency:
   # Only run once for latest commit per ref and cancel other (previous) runs.
@@ -49,10 +43,6 @@ jobs:
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
 
-      - name: debug keycloak conditional
-        run: |
-          echo ${{ env.KEYCLOAK_VERSION }}
-
       # Login against a Docker registry
       - name: Log into registry ${{ env.REGISTRY }}
         uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
@@ -74,10 +64,13 @@ jobs:
           echo "TIME_STAMP=$(date +'%Y%m%d%H%M%S')" >> "$GITHUB_ENV"
           echo "SHORT_COMMIT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
-      # Override Keycloak version for main branches
-      - name: Get Keycloak version (protected)
-        if: github.ref_protected
+      # Get Keycloak version
+      - name: Get Keycloak version
         run: echo "KEYCLOAK_VERSION=$(echo ${{ github.ref_name }} | sed 's:.*/::')" >> "$GITHUB_ENV"
+
+      - name: debug keycloak conditional
+        run: |
+          echo ${{ env.KEYCLOAK_VERSION }}
 
       # Get Keycloak image name for main branches
       - name: Get image name (protected)
@@ -96,10 +89,6 @@ jobs:
       # ---------------------------------------------------------------------------
       # Keycloak <v20.0.1
       # ---------------------------------------------------------------------------
-
-      - name: debug keycloak conditional
-        run: |
-          echo ${{ env.KEYCLOAK_VERSION }}
 
       # Build Keycloak (Maven) for <v20.0.1
       - name: Build Keycloak distribution (<v20.0.1)
