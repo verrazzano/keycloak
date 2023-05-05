@@ -175,7 +175,7 @@ jobs:
           cp ${{ github.workspace }}/LICENSE.txt .
           cp ${{ github.workspace }}/README.md .
           mkdir extra-notices
-          cd extra notices
+          cd extra-notices
           cp ${{ github.workspace }}/THIRD_PARTY_LICENSES.txt .
           cp ${{ github.workspace }}/LICENSE.txt .
 
