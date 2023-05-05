@@ -105,26 +105,24 @@ jobs:
         if: env.KEYCLOAK_VERSION == '15.0.2'
         run : |
           mvn --settings maven-settings.xml -Pdistribution -pl distribution/server-dist -am -Dmaven.test.skip clean install >> mvn_build.out 2>&1
-          mkdir -p extract-archive
-          echo "build succeeded"
+          mkdir -p ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
           cp ${{ env.BUILD_DIR }}/${{ env.KEYCLOAK_ARCHIVE }} ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
           cd ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
           tar zxf ${{ env.KEYCLOAK_ARCHIVE }}
           rm ${{ env.KEYCLOAK_ARCHIVE }}
 
       # Delete cxf-*.jar from the distribution
-      - name: Delete jars from distribution (v15.0.2)
-        if: env.KEYCLOAK_VERSION == '15.0.2'
-        run: |
-          cd ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
-          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/cxf/impl/main/cxf-*.jar
-          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/cxf/main/cxf-*.jar
-                
       # Delete the lower versions of the jar from the distribution, as Keycloak 15.0.2 has upgraded these libraries during the build
+      # Remove jboss-client.jar, a combined client jar for WildFly, which is not required
+      # Create the archive again and copy back to the build directory
       - name: Delete lower versions from distribution (v15.0.2)
         if: env.KEYCLOAK_VERSION == '15.0.2'
         run: |
           cd ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
+          
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/cxf/impl/main/cxf-*.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/cxf/main/cxf-*.jar
+          
           rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/commons/io/main/commons-io-2.5.jar
           rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/jsoup/main/jsoup-1.8.3.jar
           rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/thrift/main/libthrift-0.13.0.jar
@@ -150,18 +148,8 @@ jobs:
           rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/activemq/artemis/journal/main/artemis-journal-2.16.0.jar
           rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/yaml/snakeyaml/main/snakeyaml-1.26.jar
           
-      # Remove jboss-client.jar, a combined client jar for WildFly, which is not required
-      - name: Delete jboss jar from distribution (v15.0.2)
-        if: env.KEYCLOAK_VERSION == '15.0.2'
-        run: |
-          cd ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
-          rm keycloak-${{ env.KEYCLOAK_VERSION }}/bin/client/jboss-client.jar          
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/bin/client/jboss-client.jar
           
-      # Create the archive again and copy back to the build directory
-      - name: Rebuild distribution (v15.0.2)
-        if: env.KEYCLOAK_VERSION == '15.0.2'
-        run: |
-          cd ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
           tar -czf ${{ env.KEYCLOAK_ARCHIVE }} *
           cd ${{ env.BUILD_DIR }}
           mv ${{ env.TEMP_DIR }}/${{ env.KEYCLOAK_ARCHIVE }} .
@@ -180,6 +168,8 @@ jobs:
       - name: Copy additional artifacts (v15.0.2)
         if: env.KEYCLOAK_VERSION == '15.0.2'
         run: |
+          pwd
+          ls ..
           cd ${{ github.workspace }}/keycloak-containers/server
           cp ${{ github.workspace }}/distribution/server-dist/target/${{ env.KEYCLOAK_ARCHIVE }} .
           cp ${{ github.workspace }}/THIRD_PARTY_LICENSES.txt .
