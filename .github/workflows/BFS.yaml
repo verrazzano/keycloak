@@ -187,7 +187,7 @@ jobs:
         with:
           context: ${{ github.workspace }}/keycloak-containers/server
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
+          tags: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
           file: ${{ github.workspace }}/keycloak-containers/server/Dockerfile_verrazzano
           build-args: KEYCLOAK_DIST=${{ env.KEYCLOAK_ARCHIVE }}
 
