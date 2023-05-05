@@ -220,7 +220,7 @@ jobs:
         with:
           context: ${{ github.workspace }}/quarkus/container
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
+          tags: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
           file: ${{ github.workspace }}/quarkus/container/Dockerfile_verrazzano
           build-args: KEYCLOAK_DIST=${{ env.KEYCLOAK_ARCHIVE }}
 
