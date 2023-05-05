@@ -37,9 +37,15 @@ jobs:
       id-token: write
 
     steps:
+      # Get Keycloak version
+      - name: Get Keycloak version
+        run: echo "KEYCLOAK_VERSION=$(echo ${{ github.ref_name }} | sed 's:.*/::')" >> "$GITHUB_ENV"
+
       # Checkout keycloak repo
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: oracle/release/${{ env.KEYCLOAK_VERSION }}
 
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
@@ -64,10 +70,6 @@ jobs:
         run: |
           echo "TIME_STAMP=$(date +'%Y%m%d%H%M%S')" >> "$GITHUB_ENV"
           echo "SHORT_COMMIT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
-
-      # Get Keycloak version
-      - name: Get Keycloak version
-        run: echo "KEYCLOAK_VERSION=$(echo ${{ github.ref_name }} | sed 's:.*/::')" >> "$GITHUB_ENV"
 
       # Get Keycloak image name for main branches
       - name: Get image name (protected)
@@ -102,15 +104,13 @@ jobs:
       - name: Build Keycloak distribution (v15.0.2)
         if: env.KEYCLOAK_VERSION == '15.0.2'
         run : |
-          mvn --settings maven-settings.xml -Pdistribution -pl distribution/server-dist -am -Dmaven.test.skip clean install
-
-#          mkdir -p extract-archive
-#          echo "build succeeded"
-#          cp ${{ env.BUILD_DIR }}/${{ env.KEYCLOAK_ARCHIVE }} ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
-#          cd ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
-#          tar zxf ${{ env.KEYCLOAK_ARCHIVE }}
-#          pwd
-#          rm ${{ env.KEYCLOAK_ARCHIVE }}
+          mvn --settings maven-settings.xml -Pdistribution -pl distribution/server-dist -am -Dmaven.test.skip clean install >> mvn_build.out 2>&1
+          mkdir -p extract-archive
+          echo "build succeeded"
+          cp ${{ env.BUILD_DIR }}/${{ env.KEYCLOAK_ARCHIVE }} ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
+          cd ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
+          tar zxf ${{ env.KEYCLOAK_ARCHIVE }}
+          rm ${{ env.KEYCLOAK_ARCHIVE }}
 
       # Delete cxf-*.jar from the distribution
       - name: Delete jars from distribution (v15.0.2)
