@@ -168,8 +168,6 @@ jobs:
       - name: Copy additional artifacts (v15.0.2)
         if: env.KEYCLOAK_VERSION == '15.0.2'
         run: |
-          pwd
-          ls ..
           cd ${{ github.workspace }}/keycloak-containers/server
           cp ${{ github.workspace }}/distribution/server-dist/target/${{ env.KEYCLOAK_ARCHIVE }} .
           cp ${{ github.workspace }}/THIRD_PARTY_LICENSES.txt .
@@ -177,7 +175,9 @@ jobs:
           cp ${{ github.workspace }}/LICENSE.txt .
           cp ${{ github.workspace }}/README.md .
           mkdir extra-notices
-          find ${{ github.workspace }} -name \\*icense\\*txt -exec cp {} extra-notices/ \\;
+          cd extra notices
+          cp ${{ github.workspace }}/THIRD_PARTY_LICENSES.txt .
+          cp ${{ github.workspace }}/LICENSE.txt .
 
       # Build and push Docker image for v15.0.2
       - name: Build and push (v15.0.2)
