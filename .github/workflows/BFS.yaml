@@ -14,7 +14,7 @@ on:
   push:
     branches:
       - 'oracle/release/*'
-      - 'bfs/*'
+      - 'bfs/**'
   workflow_dispatch:
 
 env:
