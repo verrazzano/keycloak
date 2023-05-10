@@ -15,6 +15,7 @@ on:
     branches:
       - 'oracle/release/*'
       - 'bfs/**'
+      - 'bfs/stshapir/*'
   workflow_dispatch:
 
 env:
