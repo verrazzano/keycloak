@@ -42,11 +42,13 @@ jobs:
       - name: Get Keycloak version
         run: echo "KEYCLOAK_VERSION=$(echo ${{ github.ref_name }} | sed 's:.*/::')" >> "$GITHUB_ENV"
 
-      # Checkout keycloak repo
+      # Checkout Keycloak repo
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          ref: oracle/release/${{ env.KEYCLOAK_VERSION }}
+
+      # Validate Keycloak version for N.N.N pattern
+      - name: Validate Keycloak version
+        run: ./scripts/validate_version.sh ${{ env.KEYCLOAK_VERSION }}
 
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
