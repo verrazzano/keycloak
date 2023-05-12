@@ -8,7 +8,7 @@
 # ---------------------------------------------------------------------------
 
 name: Keycloak BFS
-run-name: GitHub Actions workflow triggered by changes to Keycloak BFS 🔑
+run-name: GitHub Actions workflow to build Verrazzano Keycloak 🔑
 
 on:
   push:
