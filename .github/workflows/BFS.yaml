@@ -1,0 +1,225 @@
+# Copyright (c) 2023, Oracle Corporation and/or its affiliates.
+#
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# http://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Verrazzano GitHub Actions Keycloak BFS.
+# ---------------------------------------------------------------------------
+
+name: Keycloak BFS
+run-name: GitHub Actions workflow to build Verrazzano Keycloak 🔑
+
+on:
+  push:
+    branches:
+      - 'oracle/release/*'
+      - 'bfs/**'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+concurrency:
+  # Only run once for latest commit per ref and cancel other (previous) runs.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      # Checkout Keycloak repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Get Keycloak version
+      - name: Get Keycloak version
+        run: echo "KEYCLOAK_VERSION=$(echo ${{ github.ref_name }} | sed 's:.*/::')" >> "$GITHUB_ENV"
+
+      # Validate Keycloak version for N.N.N pattern
+      - name: Validate Keycloak version
+        run: ./scripts/validate_version.sh ${{ env.KEYCLOAK_VERSION }}
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Login against a Docker registry
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Get Keycloak image name for developer branches
+      - name: Get image name (developer)
+        if: ${{ !github.ref_protected }}
+        run: echo "IMAGE_NAME=${{ github.repository }}-temp" >> "$GITHUB_ENV"
+
+      # Extract metadata (tags, labels) for Docker
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      # Get Keycloak image tag
+      - name: Get image tag
+        run: |
+          TIME_STAMP=$(date +'%Y%m%d%H%M%S')
+          SHORT_COMMIT_SHA=$(git rev-parse --short HEAD)
+          echo "DOCKER_IMAGE_TAG=v${{ env.KEYCLOAK_VERSION }}-$TIME_STAMP-$SHORT_COMMIT_SHA" >> "$GITHUB_ENV"
+
+      # Get Keycloak archive name
+      - name: Get archive name
+        run: echo "KEYCLOAK_ARCHIVE=keycloak-${{ env.KEYCLOAK_VERSION }}.tar.gz" >> "$GITHUB_ENV"
+
+      # ---------------------------------------------------------------------------
+      # Keycloak v15.0.2
+      # ---------------------------------------------------------------------------
+
+      # Initialize environment variables for v15.0.2
+      - name: Setup Keycloak (v15.0.2)
+        if: env.KEYCLOAK_VERSION == '15.0.2'
+        run: |
+          echo "BUILD_DIR=${{ github.workspace }}/distribution/server-dist/target" >> "$GITHUB_ENV"
+          echo "TEMP_DIR=extract-archive" >> "$GITHUB_ENV"
+
+      # Build Keycloak (Maven) for v15.0.2
+      - name: Build Keycloak distribution (v15.0.2)
+        if: env.KEYCLOAK_VERSION == '15.0.2'
+        run : |
+          mvn --settings maven-settings.xml -Pdistribution -pl distribution/server-dist -am -Dmaven.test.skip clean install >> mvn_build.out 2>&1
+          mkdir -p ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
+          cp ${{ env.BUILD_DIR }}/${{ env.KEYCLOAK_ARCHIVE }} ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
+          cd ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
+          tar zxf ${{ env.KEYCLOAK_ARCHIVE }}
+          rm ${{ env.KEYCLOAK_ARCHIVE }}
+
+      # Delete cxf-*.jar from the distribution
+      # Delete the lower versions of the jar from the distribution, as Keycloak 15.0.2 has upgraded these libraries during the build
+      # Remove jboss-client.jar, a combined client jar for WildFly, which is not required
+      # Create the archive again and copy back to the build directory
+      - name: Delete lower versions from distribution (v15.0.2)
+        if: env.KEYCLOAK_VERSION == '15.0.2'
+        run: |
+          cd ${{ env.BUILD_DIR }}/${{ env.TEMP_DIR }}
+          
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/cxf/impl/main/cxf-*.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/cxf/main/cxf-*.jar
+          
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/commons/io/main/commons-io-2.5.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/jsoup/main/jsoup-1.8.3.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/thrift/main/libthrift-0.13.0.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/santuario/xmlsec/main/xmlsec-2.1.6.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/sshd/main/sshd-core-2.4.0.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/sshd/main/sshd-common-2.4.0.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/com/squareup/okhttp3/main/okhttp-3.9.0.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/jboss/resteasy/resteasy-client-microprofile/main/resteasy-client-microprofile-3.15.1.Final.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/jboss/resteasy/resteasy-jaxrs/main/resteasy-client-3.15.1.Final.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/picketlink/common/main/picketlink-common-2.5.5.SP12-redhat-00009.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/jgroups/kubernetes/main/jgroups-kubernetes-1.0.15.Final.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/cxf/ws-security/main/cxf-rt-ws-security-3.3.10.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/cxf/services-sts/main/cxf-services-sts-core-3.3.10.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/logging/log4j/api/main/log4j-api-2.14.0.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/io/smallrye/reactive/mutiny/main/mutiny-0.14.0.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/com/h2database/h2/main/h2-1.4.197.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/avro/main/avro-1.7.6.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/xerces/main/xercesImpl-2.12.0.SP03.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/com/fasterxml/jackson/core/jackson-databind/main/jackson-databind-2.12.1.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/hibernate/main/hibernate-core-5.3.20.Final.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/hibernate/main/hibernate-envers-5.3.20.Final.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/activemq/artemis/journal/main/artemis-commons-2.16.0.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/apache/activemq/artemis/journal/main/artemis-journal-2.16.0.jar
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/modules/system/layers/base/org/yaml/snakeyaml/main/snakeyaml-1.26.jar
+          
+          rm keycloak-${{ env.KEYCLOAK_VERSION }}/bin/client/jboss-client.jar
+          
+          tar -czf ${{ env.KEYCLOAK_ARCHIVE }} *
+          cd ${{ env.BUILD_DIR }}
+          mv ${{ env.TEMP_DIR }}/${{ env.KEYCLOAK_ARCHIVE }} .
+          rm -rf ${{ env.TEMP_DIR }}
+
+      # Checkout keycloak-containers repo for v15.0.2
+      - name: Checkout keycloak-containers repo (v15.0.2)
+        if: env.KEYCLOAK_VERSION == '15.0.2'
+        uses: actions/checkout@v3
+        with:
+          repository: verrazzano/keycloak-containers
+          ref: oracle-build-from-source-${{ env.KEYCLOAK_VERSION }}
+          path: keycloak-containers
+
+      # Copy additional licenses, etc. for v15.0.2
+      - name: Copy additional artifacts (v15.0.2)
+        if: env.KEYCLOAK_VERSION == '15.0.2'
+        run: |
+          cd ${{ github.workspace }}/keycloak-containers/server
+          cp ${{ github.workspace }}/distribution/server-dist/target/${{ env.KEYCLOAK_ARCHIVE }} .
+          cp ${{ github.workspace }}/THIRD_PARTY_LICENSES.txt .
+          cp ${{ github.workspace }}/SECURITY.md .
+          cp ${{ github.workspace }}/LICENSE.txt .
+          cp ${{ github.workspace }}/README.md .
+          mkdir extra-notices
+          cd extra-notices
+          cp ${{ github.workspace }}/THIRD_PARTY_LICENSES.txt .
+          cp ${{ github.workspace }}/LICENSE.txt .
+
+      # Build and push Docker image for v15.0.2
+      - name: Build and push (v15.0.2)
+        if: env.KEYCLOAK_VERSION == '15.0.2'
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ github.workspace }}/keycloak-containers/server
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
+          file: ${{ github.workspace }}/keycloak-containers/server/Dockerfile_verrazzano
+          build-args: KEYCLOAK_DIST=${{ env.KEYCLOAK_ARCHIVE }}
+
+      # ---------------------------------------------------------------------------
+      # Keycloak v20.0.1+
+      # ---------------------------------------------------------------------------
+
+      # Build Keycloak (Maven) for v20.0.1+
+      - name: Build Keycloak distribution (v20.0.1+)
+        if: env.KEYCLOAK_VERSION == '20.0.1' || env.KEYCLOAK_VERSION == '20.0.3'
+        run : |
+          cd ${{github.workspace}}/quarkus
+          mvn --settings ../maven-settings.xml -f ../pom.xml clean install -DskipTestsuite -DskipExamples -DskipTests >> ${{ github.workspace }}/mvn_build_main.out 2>&1
+          mvn --settings ../maven-settings.xml -f dist/pom.xml clean install >> ${{ github.workspace }}/mvn_build_quarkus.out 2>&1
+
+      # Copy additional licenses, etc. for v20.0.1+
+      - name: Copy additional artifacts (v20.0.1+)
+        if: env.KEYCLOAK_VERSION == '20.0.1' || env.KEYCLOAK_VERSION == '20.0.3'
+        run: |
+          cd ${{ github.workspace }}/quarkus
+          cp ./dist/target/${{ env.KEYCLOAK_ARCHIVE }} ./container
+          cp ../THIRD_PARTY_LICENSES.txt ./container
+          cp ../SECURITY.md ./container
+          cp ../LICENSE.txt ./container
+          cp ../README.md ./container
+
+      # Build and push Docker image for v20.0.1+
+      - name: Build and push (v20.0.1+)
+        if: env.KEYCLOAK_VERSION == '20.0.1' || env.KEYCLOAK_VERSION == '20.0.3'
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ github.workspace }}/quarkus/container
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
+          file: ${{ github.workspace }}/quarkus/container/Dockerfile_verrazzano
+          build-args: KEYCLOAK_DIST=${{ env.KEYCLOAK_ARCHIVE }}
+
+      # Upload Maven build artifact
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: mvn_build
+          path: '**/mvn_build*.out'
