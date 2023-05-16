@@ -223,5 +223,3 @@ jobs:
         with:
           name: mvn_build
           path: '**/mvn_build*.out'
-
-      # Scan container image
