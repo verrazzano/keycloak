@@ -19,7 +19,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  NAMESPACE: verrazzano
+  IMAGE_NAME: ${{ github.repository }}
 
 concurrency:
   # Only run once for latest commit per ref and cancel other (previous) runs.
@@ -33,60 +33,50 @@ jobs:
     permissions:
       contents: read
       packages: write
-      # This is used to complete the identity challenge
-      # with sigstore/fulcio when running outside of PRs.
       id-token: write
 
     steps:
-      # Get Keycloak version
-      - name: Get Keycloak version
-        run: echo "KEYCLOAK_VERSION=$(echo ${{ github.ref_name }} | sed 's:.*/::')" >> "$GITHUB_ENV"
-
       # Checkout Keycloak repo
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      # Get Keycloak version
+      - name: Get Keycloak version
+        run: echo "KEYCLOAK_VERSION=$(echo ${{ github.ref_name }} | sed 's:.*/::')" >> "$GITHUB_ENV"
 
       # Validate Keycloak version for N.N.N pattern
       - name: Validate Keycloak version
         run: ./scripts/validate_version.sh ${{ env.KEYCLOAK_VERSION }}
 
       - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
+        uses: docker/setup-buildx-action@v2
 
       # Login against a Docker registry
       - name: Log into registry ${{ env.REGISTRY }}
-        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Extract metadata (tags, labels) for Docker
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-      # Get short commit tag
-      - name: Get short commit tag
-        run: |
-          echo "TIME_STAMP=$(date +'%Y%m%d%H%M%S')" >> "$GITHUB_ENV"
-          echo "SHORT_COMMIT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
-
-      # Get Keycloak image name for main branches
-      - name: Get image name (protected)
-        if: github.ref_protected
-        run: echo "IMAGE_NAME=keycloak" >> "$GITHUB_ENV"
-
       # Get Keycloak image name for developer branches
       - name: Get image name (developer)
         if: ${{ !github.ref_protected }}
-        run: echo "IMAGE_NAME=keycloak-temp" >> "$GITHUB_ENV"
+        run: echo "IMAGE_NAME=${{ github.repository }}-temp" >> "$GITHUB_ENV"
+
+      # Extract metadata (tags, labels) for Docker
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       # Get Keycloak image tag
       - name: Get image tag
-        run: echo "DOCKER_IMAGE_TAG=v${{ env.KEYCLOAK_VERSION }}-${{ env.TIME_STAMP }}-${{ env.SHORT_COMMIT_SHA }}" >> "$GITHUB_ENV"
+        run: |
+          TIME_STAMP=$(date +'%Y%m%d%H%M%S')
+          SHORT_COMMIT_SHA=$(git rev-parse --short HEAD)
+          echo "DOCKER_IMAGE_TAG=v${{ env.KEYCLOAK_VERSION }}-$TIME_STAMP-$SHORT_COMMIT_SHA" >> "$GITHUB_ENV"
 
       # Get Keycloak archive name
       - name: Get archive name
@@ -189,7 +179,7 @@ jobs:
         with:
           context: ${{ github.workspace }}/keycloak-containers/server
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
           file: ${{ github.workspace }}/keycloak-containers/server/Dockerfile_verrazzano
           build-args: KEYCLOAK_DIST=${{ env.KEYCLOAK_ARCHIVE }}
 
@@ -223,7 +213,7 @@ jobs:
         with:
           context: ${{ github.workspace }}/quarkus/container
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
           file: ${{ github.workspace }}/quarkus/container/Dockerfile_verrazzano
           build-args: KEYCLOAK_DIST=${{ env.KEYCLOAK_ARCHIVE }}
 
