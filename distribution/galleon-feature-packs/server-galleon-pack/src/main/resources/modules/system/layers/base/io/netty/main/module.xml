@@ -27,7 +27,6 @@
 
     <resources>
         <artifact name="io.netty:netty-common:4.1.86.Final"></artifact>
-        <artifact name="io.netty:netty-all:4.1.86.Final"></artifact>
     </resources>
 
     <dependencies>
