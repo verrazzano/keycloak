@@ -61,12 +61,6 @@
         <org.jvnet.staxex.version>1.8.3</org.jvnet.staxex.version>
 
         <!--
-            Use Agroal version 1.5 to resolve failure with acquisition timeout while waiting for new connection, as per
-            the comment https://github.com/keycloak/keycloak/issues/16448#issuecomment-1504734541
-        -->
-        <io.agroal.version>1.15</io.agroal.version>
-
-        <!--
             Quarkiverse dependency versions
          -->
         <io.quarkiverse.vault.version>2.0.0</io.quarkiverse.vault.version>
@@ -111,21 +105,6 @@
                 <groupId>org.infinispan</groupId>
                 <artifactId>infinispan-client-hotrod</artifactId>
                 <version>${infinispan.version}</version>
-            </dependency>
-	        <dependency>
-                <groupId>io.agroal</groupId>
-                <artifactId>agroal-api</artifactId>
-                <version>${io.agroal.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.agroal</groupId>
-                <artifactId>agroal-narayana</artifactId>
-                <version>${io.agroal.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.agroal</groupId>
-                <artifactId>agroal-pool</artifactId>
-                <version>${io.agroal.version}</version>
             </dependency>
 
             <!-- Dependencies removed from JDK 11 and in compliance with those used by Wildfly. -->
