@@ -24,6 +24,7 @@ import org.keycloak.testsuite.util.SamlClientBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.security.Signature;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -303,5 +304,22 @@ public class BasicSamlTest extends AbstractSamlTest {
         assertThat("AuthnRequest/NameIdPolicy Format should be present, but it is not", formatAttribute, notNullValue());
         assertThat("AuthnRequest/NameIdPolicy Format should be Transient, but it is not", formatAttribute.getNodeValue(), is(NAMEID_FORMAT_TRANSIENT.get()));
         assertThat("AuthnRequest/NameIdPolicy element shouldn't contain the AllowCreate attribute when Format is set to Transient, but it does", allowCreateAttribute, nullValue());
+    }
+
+    @Test
+    public void testInvalidAssertionConsumerServiceURL() throws IOException {
+        try (var c = ClientAttributeUpdater.forClient(adminClient, REALM_NAME, SAML_CLIENT_ID_SALES_POST)
+                .setRedirectUris(Collections.singletonList("*"))
+                .update()) {
+
+            String page = new SamlClientBuilder()
+                    .authnRequest(getAuthServerSamlEndpoint(REALM_NAME), SAML_CLIENT_ID_SALES_POST, "javascript:alert('XSS')", Binding.POST)
+                    .build()
+                    .executeAndTransform(response -> {
+                        assertThat(response, statusCodeIsHC(Status.BAD_REQUEST));
+                        return EntityUtils.toString(response.getEntity(), "UTF-8");
+                    });
+            assertThat(page, containsString("Invalid redirect uri"));
+        }
     }
 }
