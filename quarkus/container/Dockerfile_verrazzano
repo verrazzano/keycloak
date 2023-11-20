@@ -27,22 +27,13 @@ RUN chmod -R g+rwX /opt/keycloak
 RUN (mkdir /opt/xa && \
     chmod -R g+rwX /opt/xa)
 
-FROM ghcr.io/oracle/oraclelinux:8-slim
+FROM ghcr.io/verrazzano/ol8-java21:v0.0.1-20231102152128-e7afc807
 ENV LANG en_US.UTF-8
 
 COPY --from=build_env --chown=1000:0 /opt/keycloak /opt/keycloak
 COPY --from=build_env --chown=1000:0 /opt/xa /opt/xa
 
-RUN microdnf update -y && \
-    microdnf install -y --nodocs java-11-openjdk-headless glibc-langpack-en && \
-    microdnf install -y python38 python38-pip && \
-    # remove the previously installed setuptools info
-    rm -rf /usr/lib/python3.8/site-packages/setuptools-41.6.0.dist-info && \
-    # install the upgraded setuptools
-    pip3 install setuptools --upgrade && \
-    rm -rf /usr/lib/python3.6 && \
-    microdnf clean all && rm -rf /var/cache/yum/* && \
-    echo "keycloak:x:0:root" >> /etc/group && \
+RUN echo "keycloak:x:0:root" >> /etc/group && \
     echo "keycloak:x:1000:0:keycloak user:/opt/keycloak:/sbin/nologin" >> /etc/passwd
 
 # Narayana JTA creates ObjectStore under the directory derived from system property user.dir, so make /opt/xa as working directory
