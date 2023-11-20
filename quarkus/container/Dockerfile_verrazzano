@@ -27,7 +27,7 @@ RUN chmod -R g+rwX /opt/keycloak
 RUN (mkdir /opt/xa && \
     chmod -R g+rwX /opt/xa)
 
-FROM ghcr.io/verrazzano/ol8-java17-jenkins:v0.0.1-20231102152128-e7afc807
+FROM ghcr.io/verrazzano/ol8-java17-jenkins:v0.0.1-20231108171318-97ee797f
 ENV LANG en_US.UTF-8
 
 COPY --from=build_env --chown=1000:0 /opt/keycloak /opt/keycloak
